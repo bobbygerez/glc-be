@@ -1,0 +1,152 @@
+<?php
+
+namespace App\Repo\Product;
+
+use App\Model\Product;
+use App\Repo\BaseRepository;
+use Auth;
+use App\Model\Branch;
+use App\Model\Image;
+
+class DashboardProductRepository extends BaseRepository implements ProductInterface
+{
+
+    public function __construct()
+    {
+        $this->modelName = new Product();
+    }
+
+    public function index($request){
+        return $this->whereLike('name', 'like', '%' . $request->filter . '%')
+                ->with(['category', 'catalog'])
+                ->orderBy('created_at', 'desc')->get();
+    }
+
+
+    public function edit($request){
+
+       $product = $this->where('id',$request->id)->reltable()->first();
+
+       $cat1 = $product->category;
+       $cat2 = $cat1->allParent;
+       $cat3 = $cat2 !== null ?  $cat2->allParent : null;
+       $categories = collect([$cat1, $cat2, $cat3])->reject(function($val){
+        return is_null($val);
+       })->sortBy('parent_id')->values()->all();
+
+       return [
+           'product' => $product,
+           'categories' => $categories
+       ];
+    }
+
+    //Flatten Recursive
+    public function flatten($array) {
+        $result = [];
+        foreach ($array as $item) {
+            if(is_array($item)){
+                $result[] = $item['all_parent'];
+                $result = array_merge($result, $this->flatten($item['allParent']));
+            }
+            
+        }
+        return array_filter($result);
+    }
+
+    public function update($request){
+       $product = $this->find($request->optimus_id);
+       $productImages = $product->images;
+       
+       foreach($productImages as $img){
+            if(!in_array($img->id, $request->ids)){
+                $img->delete();
+            }
+       }
+       if($request->ids != null){
+            $images = Image::whereIn('id', $request->ids)->get();
+
+            foreach($images as $image){
+                if($request->is_primary === $image->name){
+                    Image::find($image->id)->update([
+                        'is_primary' => true
+                    ]);
+                }else{
+                    Image::find($image->id)->update([
+                        'is_primary' => false
+                    ]);
+                }
+            }
+       }
+
+       $this->addImages($product, $request);
+       
+       $product->update($request->all());
+   
+}
+
+
+
+    public function create($request)
+    {
+        $newRequest = $request->all();
+        $newRequest['catalog_id'] = $this->removeStringEncode( $request->catalog_id );
+        $product = $this->modelName->create($newRequest);
+        $product = $this->modelName->find($product->id);
+
+        $groupIds = explode(',', $request->group_ids);
+        foreach($groupIds as $id){
+            $product->groups()->attach($product->id, [
+                'product_id' => $product->id,
+                'group_id' => $id
+            ]);
+        }
+        
+        $this->addImages($product, $request);
+
+    }
+
+    public function addImages($product, $request){
+        if(isset($_FILES["files"]["name"])){
+            foreach($_FILES["files"]["name"] as $key=>$tmp_name){
+                $file_name= str_random(32) . '-'. $_FILES["files"]["name"][$key];
+                $file_tmp=$_FILES["files"]["tmp_name"][$key];
+                $uploadfile = file_get_contents($file_tmp);
+
+                \File::put(public_path() . '/images/uploads/'.$file_name, $uploadfile);
+
+                if ($_FILES["files"]["name"][$key] === $request->is_primary) {
+                    Image::create([
+                        'path' => 'images/uploads/' . $file_name,
+                        'imageable_id' => $product->id,
+                        'imageable_type' => 'App\Model\Product',
+                        'is_primary' => true,
+                        'name' => $file_name,
+                        'desc' => $file_name,
+                    ]);
+                    
+                }else{
+                    Image::create([
+                        'path' => 'images/uploads/' . $file_name,
+                        'imageable_id' => $product->id,
+                        'imageable_type' => 'App\Model\Product',
+                        'is_primary' => false,
+                        'name' => $file_name,
+                        'desc' => $file_name,
+                    ]);
+                }
+            }
+        }
+
+    }
+
+    public function userBranches()
+    {
+        if (Auth::User()->isSuperAdmin()) {
+            return Branch::all();
+        }
+
+        return Auth::User()->whereHas('branches', function ($q) {
+            $q->where('id', Auth::User()->id);
+        })->with('branches')->first()->branches;
+    }
+}
