@@ -21,6 +21,8 @@ class GroupController extends Controller
      */
     public function index()
     {
+
+        $this->authorize('index', Group::class);
         return response()->json([
             'groups' =>  $this->group->index( app()->make('request') ),
         ]);
@@ -44,6 +46,7 @@ class GroupController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('index', Group::class);
         $this->group->create( $request->all() );
         return response()->json([
             'success' => true
@@ -69,7 +72,7 @@ class GroupController extends Controller
      */
     public function edit(Request $request)
     {
-        
+        $this->authorize('index', Group::class);
         return response()->json([
             'group' => $this->group->find($request->id)
         ]);
@@ -84,6 +87,7 @@ class GroupController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $this->authorize('index', Group::class);
         $g = $this->group->where('id', $request->optimus_id)->first();
         $g->update($request->all());
         return response()->json([
@@ -99,6 +103,7 @@ class GroupController extends Controller
      */
     public function destroy(Request $request)
     {
+        $this->authorize('index', Group::class);
         $g = $this->group->find($request->id);
         $g->delete();
         return response()->json([

@@ -18,4 +18,8 @@ class Group extends Model
     public function getLabelAttribute(){
         return $this->name;
     }
+
+    public function products(){
+         return $this->belongsToMany('App\Model\Product', 'group_product', 'product_id', 'group_id');
+    }
 }

@@ -67,7 +67,7 @@ class LoginController extends Controller
 
     public function success($field, $value){
         $request = app()->make('request');
-        $user = User::where($field, $value)->first(); 
+        $user = User::where($field, $value)->with(['groups'])->first(); 
         $success['token'] =  $user->createToken('MyApp')->accessToken; 
         return response()->json([
                 'success' => $success,

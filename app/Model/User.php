@@ -52,6 +52,10 @@ class User extends Authenticatable
         return $this->belongsToMany('App\Model\Role', 'role_user', 'user_id', 'role_id');
     }
 
+    public function groups(){
+        return $this->belongsToMany('App\Model\Group', 'group_user', 'user_id', 'group_id');
+    }
+
     public function branches(){
         return $this->hasMany('App\Model\Branch', 'user_id', 'id');
     }

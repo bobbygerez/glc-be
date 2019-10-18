@@ -38,6 +38,10 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::resource('catalogs', 'Api\Catalog\CatalogController');
     Route::resource('product_groups', 'Api\Product\GroupController');
     Route::resource('product_catalogs', 'Api\Product\CatalogController');
+    Route::resource('user_groups', 'Api\User\GroupController');
+    Route::resource('group_products', 'Api\Group\ProductController');
+    Route::resource('group_categories', 'Api\Group\CategoryController');
+    Route::resource('group_catalogs', 'Api\Group\CatalogController');
    
 
 });

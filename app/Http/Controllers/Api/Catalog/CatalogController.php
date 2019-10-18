@@ -9,6 +9,7 @@ use App\Repo\Catalog\CatalogInterface;
 
 class CatalogController extends Controller
 {
+
     protected $catalog;
     public function __construct(CatalogInterface $catalog){
 
@@ -21,6 +22,9 @@ class CatalogController extends Controller
      */
     public function index()
     {
+
+        
+        $this->authorize('index', Catalog::class);
         return response()->json([
             'catalogs' =>  $this->catalog->index( app()->make('request') ),
         ]);
@@ -44,6 +48,7 @@ class CatalogController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('index', Catalog::class);
         $this->catalog->create( $request->all() );
         return response()->json([
             'success' => true
@@ -69,6 +74,7 @@ class CatalogController extends Controller
      */
     public function edit(Request $request)
     {
+        $this->authorize('index', Catalog::class);
         $c = $this->catalog->find($request->id);
         return response()->json([
             'catalog' => $c
@@ -84,6 +90,7 @@ class CatalogController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $this->authorize('index', Catalog::class);
         $c = $this->catalog->where('id', $request->optimus_id)->first();
         $c->update( $request->all() );
         return response()->json([
@@ -99,6 +106,7 @@ class CatalogController extends Controller
      */
     public function destroy(Request $request)
     {
+        $this->authorize('index', Catalog::class);
          $c = $this->catalog->where('id', $request->id)->first();
          $c->delete();
          return response()->json([

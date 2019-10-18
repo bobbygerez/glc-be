@@ -25,18 +25,12 @@ class DashboardProductRepository extends BaseRepository implements ProductInterf
 
     public function edit($request){
 
-       $product = $this->where('id',$request->id)->reltable()->first();
-
-       $cat1 = $product->category;
-       $cat2 = $cat1->allParent;
-       $cat3 = $cat2 !== null ?  $cat2->allParent : null;
-       $categories = collect([$cat1, $cat2, $cat3])->reject(function($val){
-        return is_null($val);
-       })->sortBy('parent_id')->values()->all();
+       $product = $this->where('id',$request->id)
+                ->with(['catalog', 'category', 'groups', 'images'])
+                ->first();
 
        return [
-           'product' => $product,
-           'categories' => $categories
+           'product' => $product
        ];
     }
 
@@ -80,7 +74,13 @@ class DashboardProductRepository extends BaseRepository implements ProductInterf
 
        $this->addImages($product, $request);
        
-       $product->update($request->all());
+       $newRequest = $request->all();
+       $newRequest['category_id'] = $this->removeStringEncode( $request->category_id );
+       $newRequest['catalog_id'] = $this->removeStringEncode( $request->catalog_id );
+
+        $groupIds = explode(',', $request->group_ids);
+        $product->groups()->sync($groupIds);
+        $product->update($newRequest);
    
 }
 
@@ -139,14 +139,4 @@ class DashboardProductRepository extends BaseRepository implements ProductInterf
 
     }
 
-    public function userBranches()
-    {
-        if (Auth::User()->isSuperAdmin()) {
-            return Branch::all();
-        }
-
-        return Auth::User()->whereHas('branches', function ($q) {
-            $q->where('id', Auth::User()->id);
-        })->with('branches')->first()->branches;
-    }
 }

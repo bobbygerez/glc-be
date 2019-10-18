@@ -18,7 +18,7 @@ class Category extends Model
         'url',
         'desc'
     ];
-    protected $appends = ['slug_name', 'optimus_id'];
+    protected $appends = ['slug_name', 'optimus_id', 'label', 'value'];
     public function parent(){
         return $this->hasOne('App\Model\Category', 'id', 'parent_id');
     }
@@ -47,6 +47,11 @@ class Category extends Model
 
     public function scopeRelTable($q){
         return $q->with(['products.images', 'parent']);
+    }
+
+    public function getLabelAttribute(){
+
+        return $this->name;
     }
 
 }

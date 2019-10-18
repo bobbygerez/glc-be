@@ -36,10 +36,13 @@ class UserRepository extends BaseRepository implements UserInterface{
     }
 
     public function update($request){
-
+        $groups = collect($request->groups)->map(function($v){
+            return $this->removeStringEncode($v);
+        });
         $user = $this->find($request->id);
         $user->address()->updateOrCreate($request->address);
         $user->roles()->sync($request->roles);
+        $user->groups()->sync($groups);
         $user->update( $request->all() );
 
         return true;

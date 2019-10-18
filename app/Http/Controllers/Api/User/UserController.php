@@ -84,7 +84,7 @@ class UserController extends Controller
     public function edit(Request $request)
     {
         return response()->json([
-            'user' => $this->user->where('id', $request->id)->with(['address.brgy','address.city','address.province', 'roles'])->first()
+            'user' => $this->user->where('id', $request->id)->with(['address.brgy','address.city','address.province', 'roles', 'groups'])->first()
         ]);
     }
 

@@ -96,6 +96,7 @@ class DashboardProductController extends Controller
     public function productUpdate(Product $product, Request $request)
     {
 
+        $this->authorize('index', Product::class);
         return response()->json([
             'success' => $this->product->update($request)
         ]);

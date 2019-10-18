@@ -44,7 +44,7 @@ class Product extends Model
     }
 
     public function groups(){
-        return $this->belongsToMany('App\Model\Group', 'group_product', 'group_id', 'product_id');
+        return $this->belongsToMany('App\Model\Group', 'group_product', 'product_id', 'group_id');
     }
 
     public function getSlugNameAttribute()

@@ -20,6 +20,8 @@ class AuthServiceProvider extends ServiceProvider
         'App\Model\Product' => 'App\Policies\ProductPolicy',
         'App\Model\Branch' => 'App\Policies\BranchPolicy',
         'App\Model\Payment' => 'App\Policies\PaymentPolicy',
+        'App\Model\Catalog' => 'App\Policies\CatalogPolicy',
+        'App\Model\Group' => 'App\Policies\GGroupPolicy',
     ];
 
     /**
@@ -37,5 +39,7 @@ class AuthServiceProvider extends ServiceProvider
         Gate::resource('dashboard_categories', 'App\Policies\CategoryPolicy');
         Gate::resource('branches', 'App\Policies\BranchPolicy');
         Gate::resource('payments', 'App\Policies\PaymentPolicy');
+        Gate::resource('catalogs', 'App\Policies\CatalogPolicy');
+        Gate::resource('groups', 'App\Policies\GGroupPolicy');
     }
 }

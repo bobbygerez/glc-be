@@ -14,7 +14,7 @@ trait OptimusPolicy
         $menus = $user->roles->flatMap(function($v){
                 return $v->menus;
             })->pluck('name')->values()->all();
-        if( in_array('Users', $menus) ){
+        if( in_array($menu, $menus) ){
             return true;
         }else{
             return false;
